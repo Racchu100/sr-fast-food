@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { menuCategories, type MenuCategory, type MenuItem } from './menuData';
 
 
@@ -105,6 +105,21 @@ function CategorySection({ category }: { category: MenuCategory }) {
 export default function Home() {
   const [activeTab, setActiveTab] = useState('soups');
   const [scrolled, setScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const scrollWrapperRef = useRef<HTMLDivElement>(null);
+  const isProgrammaticScrollRef = useRef(false);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    if (isMenuOpen) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, [isMenuOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -115,6 +130,7 @@ export default function Home() {
   }, []);
 
   const scrollTo = (id: string) => {
+    isProgrammaticScrollRef.current = true;
     setActiveTab(id);
     const el = document.getElementById(id);
     if (el) {
@@ -131,18 +147,31 @@ export default function Home() {
         }
       }
     }
+    setTimeout(() => {
+      isProgrammaticScrollRef.current = false;
+    }, 800);
   };
 
   // Auto-scroll active pill into view in the horizontal nav
   useEffect(() => {
     try {
       const activePill = document.getElementById("pill-" + activeTab);
-      if (activePill) {
-        // Use 'auto' scroll behavior to prevent smooth-scroll interference on mobile
-        activePill.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
+      const wrapper = scrollWrapperRef.current;
+      if (activePill && wrapper) {
+        const pillRect = activePill.getBoundingClientRect();
+        const wrapperRect = wrapper.getBoundingClientRect();
+        const relativeLeft = pillRect.left - wrapperRect.left + wrapper.scrollLeft;
+        const wrapperWidth = wrapper.offsetWidth;
+        const pillWidth = activePill.offsetWidth;
+        const targetScrollLeft = relativeLeft - (wrapperWidth / 2) + (pillWidth / 2);
+        
+        wrapper.scrollTo({
+          left: targetScrollLeft,
+          behavior: 'auto'
+        });
       }
     } catch (e) {
-      console.warn("scrollIntoView is not supported on this device/browser:", e);
+      console.warn("Error auto-scrolling active pill:", e);
     }
   }, [activeTab]);
 
@@ -151,6 +180,8 @@ export default function Home() {
     if (typeof window === 'undefined') return;
 
     const handleScrollActiveTrack = () => {
+      if (isProgrammaticScrollRef.current) return;
+      
       const scrollYVal = window.scrollY !== undefined ? window.scrollY : window.pageYOffset;
       const headerOffset = 110; // Compensates for header height + safety offset
 
@@ -188,7 +219,7 @@ export default function Home() {
       {/* ── Sticky Header Wrapper ── */}
       <header className={`sticky top-0 z-50 bg-[#0D0D0D]/85 backdrop-blur-md transition-all duration-300 ${scrolled ? 'border-b border-accent/40 shadow-lg shadow-accent-glow/5' : 'border-b border-border'}`}>
         {/* Main Navbar */}
-        <div className="menu-container header-navbar flex items-center justify-start">
+        <div className="menu-container header-navbar flex items-center justify-between">
           <div className="flex items-center cursor-pointer" onClick={() => {
             try {
               window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -200,10 +231,21 @@ export default function Home() {
               <img src="/logo.webp" alt="SR Fast Food Logo" className="w-full h-full rounded-full object-cover" />
             </div>
           </div>
+
+          {/* Hamburger Trigger Button */}
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="w-11 h-11 rounded-xl bg-bg-card border border-border flex items-center justify-center text-text-primary hover:text-accent hover:border-accent/40 transition-all duration-200 cursor-pointer active:scale-95 shadow-sm"
+            aria-label="Open Menu"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
         </div>
 
         {/* Category Pill Nav */}
-        <div className="menu-container header-pills overflow-x-auto scrollbar-hide">
+        <div ref={scrollWrapperRef} className="menu-container header-pills overflow-x-auto scrollbar-hide">
           <div className="category-pill-container w-max">
             {menuCategories.map((c) => {
               const isActive = activeTab === c.id;
@@ -339,6 +381,75 @@ export default function Home() {
         
         <p className="text-text-muted/65 text-[10px] font-bold tracking-wider uppercase mt-8">{"© 2026 SR Fast Food · All rights reserved"}</p>
       </footer>
+
+      {/* ── Full-Page Hamburger Drawer ── */}
+      <div className={`hamburger-drawer ${isMenuOpen ? 'hamburger-drawer-open' : 'hamburger-drawer-closed'}`}>
+        {/* Drawer Header (Logo & Close Button) */}
+        <div className="flex items-center justify-between w-full border-b border-border pb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-11 h-11 rounded-full border border-accent/40 p-[1.5px] shadow-sm flex items-center justify-center overflow-hidden flex-shrink-0">
+              <img src="/logo.webp" alt="SR Fast Food Logo" className="w-full h-full rounded-full object-cover" />
+            </div>
+            <span className="font-syne font-bold text-base tracking-tight text-white">SR Fast Food</span>
+          </div>
+          <button
+            onClick={() => setIsMenuOpen(false)}
+            className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-text-muted hover:text-accent hover:bg-white/10 transition-all duration-200 cursor-pointer active:scale-95"
+            aria-label="Close Menu"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Drawer Menu Links */}
+        <div className="flex flex-col gap-1 my-3 overflow-y-auto max-h-[58vh] pr-2">
+          {menuCategories.map((c) => {
+            const isActive = activeTab === c.id;
+            return (
+              <a
+                key={c.id}
+                href={`#${c.id}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollTo(c.id);
+                  setIsMenuOpen(false);
+                }}
+                className={`drawer-link ${isActive ? 'drawer-link-active' : ''}`}
+              >
+                <span className="text-lg">{c.emoji}</span>
+                <span>{c.label}</span>
+              </a>
+            );
+          })}
+        </div>
+
+        {/* Drawer Footer (Opening Hours & Contact Details) */}
+        <div className="border-t border-border pt-4 mt-auto">
+          <div className="flex flex-col gap-3 text-xs text-text-muted font-sans">
+            <div className="flex justify-between border-b border-border/50 pb-2">
+              <span className="font-semibold text-text-primary">🕐 Operating Hours:</span>
+              <span className="text-right">Everyday, 1:00 PM - 11:00 PM</span>
+            </div>
+            <div className="flex justify-between border-b border-border/50 pb-2 items-start gap-4">
+              <span className="font-semibold text-text-primary shrink-0">📍 Address:</span>
+              <span className="text-right">07, leevel junction, Bolar, Mangaluru, Karnataka 575001</span>
+            </div>
+            <div className="flex justify-between pb-1 items-start gap-4">
+              <span className="font-semibold text-text-primary shrink-0">📞 Contact / Order:</span>
+              <div className="flex flex-col items-end gap-1">
+                <a href="tel:+917760288291" className="hover:text-accent font-medium transition-colors duration-200">
+                  +91 77602 88291
+                </a>
+                <a href="tel:+918310063867" className="hover:text-accent font-medium transition-colors duration-200">
+                  +91 83100 63867
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
