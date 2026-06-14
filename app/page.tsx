@@ -202,15 +202,19 @@ export default function Home() {
             {menuCategories.map((c) => {
               const isActive = activeTab === c.id;
               return (
-                <button
+                <a
                   key={c.id}
                   id={"pill-" + c.id}
-                  onClick={() => scrollTo(c.id)}
+                  href={`#${c.id}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollTo(c.id);
+                  }}
                   className={"category-pill-button cursor-pointer transition-all duration-200 active:scale-95 " + (isActive ? 'tab-active' : 'tab-inactive')}
                 >
                   <span className="text-sm">{c.emoji}</span>
                   <span>{c.label}</span>
-                </button>
+                </a>
               );
             })}
           </div>
