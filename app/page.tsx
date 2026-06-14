@@ -119,9 +119,17 @@ export default function Home() {
     const el = document.getElementById(id);
     if (el) {
       const yOffset = -85;
-      const scrollYVal = window.scrollY !== undefined ? window.scrollY : window.pageYOffset;
+      const scrollYVal = typeof window !== 'undefined' && window.scrollY !== undefined ? window.scrollY : (typeof window !== 'undefined' ? window.pageYOffset : 0);
       const y = el.getBoundingClientRect().top + scrollYVal + yOffset;
-      window.scrollTo({ top: y, behavior: 'smooth' });
+      try {
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      } catch (e) {
+        try {
+          window.scrollTo(0, y);
+        } catch (err) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
     }
   };
 
