@@ -191,7 +191,7 @@ export default function Home() {
             }
           }}>
             <div className="w-16 h-16 rounded-full border border-accent/40 p-[2.5px] shadow-lg shadow-accent-glow/20 flex items-center justify-center overflow-hidden flex-shrink-0 transition-transform duration-300 hover:scale-105">
-              <img src="/logo.jpg" alt="SR Fast Food Logo" className="w-full h-full rounded-full object-cover" />
+              <img src="/logo.webp" alt="SR Fast Food Logo" className="w-full h-full rounded-full object-cover" />
             </div>
           </div>
         </div>
@@ -300,7 +300,7 @@ export default function Home() {
       <footer className="bg-bg-card text-text-primary text-center py-12 px-4 mt-12 rounded-t-[2.5rem] border-t border-border relative overflow-hidden shadow-2xl">
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent to-accent/40" />
         <div className="w-32 h-32 mx-auto mb-6 rounded-full border border-accent/30 p-1 shadow-2xl shadow-accent-glow/20 overflow-hidden transition-transform duration-300 hover:scale-105">
-          <img src="/logo.jpg" alt="SR Fast Food Logo" className="w-full h-full rounded-full object-cover" />
+          <img src="/logo.webp" alt="SR Fast Food Logo" className="w-full h-full rounded-full object-cover" />
         </div>
         <h2 className="font-syne font-bold text-xl tracking-tight text-white">SR Fast Food Bolara</h2>
         <p className="text-accent text-xs font-bold tracking-wide uppercase mt-1">Fresh · Tasty · Fast</p>
