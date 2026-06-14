@@ -167,25 +167,24 @@ export default function Home() {
   const telUrl = "tel:" + phoneNumber;
   const waUrl = "https://wa.me/" + phoneNumber.replace('+', '') + "?text=" + waText;
 
-  const brandTextClass = "font-syne font-bold text-sm tracking-tight text-white";
+  const brandTextClass = "font-syne font-bold text-lg tracking-tight text-white transition-colors duration-200 hover:text-accent";
 
   return (
     <div className="min-h-screen pb-8">
       {/* ── Sticky Header Wrapper ── */}
       <header className={`sticky top-0 z-50 bg-[#0D0D0D]/85 backdrop-blur-md transition-all duration-300 ${scrolled ? 'border-b border-accent/40 shadow-lg shadow-accent-glow/5' : 'border-b border-border'}`}>
         {/* Main Navbar */}
-        <div className="menu-container header-navbar flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => {
+        <div className="menu-container header-navbar flex items-center justify-start">
+          <div className="flex items-center cursor-pointer" onClick={() => {
             try {
               window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (e) {
               window.scrollTo(0, 0);
             }
           }}>
-            <div className="w-8 h-8 rounded-full border border-accent/40 p-[1px] shadow-sm shadow-accent-glow flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div className="w-16 h-16 rounded-full border border-accent/40 p-[2.5px] shadow-lg shadow-accent-glow/20 flex items-center justify-center overflow-hidden flex-shrink-0 transition-transform duration-300 hover:scale-105">
               <img src="/logo.jpg" alt="SR Fast Food Logo" className="w-full h-full rounded-full object-cover" />
             </div>
-            <span className={brandTextClass}>SR Fast Food</span>
           </div>
         </div>
 
