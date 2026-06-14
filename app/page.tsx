@@ -138,35 +138,41 @@ export default function Home() {
     try {
       const activePill = document.getElementById("pill-" + activeTab);
       if (activePill) {
-        activePill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        // Use 'auto' scroll behavior to prevent smooth-scroll interference on mobile
+        activePill.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
       }
     } catch (e) {
-      console.warn("Smooth scrollIntoView is not supported on this device/browser:", e);
+      console.warn("scrollIntoView is not supported on this device/browser:", e);
     }
   }, [activeTab]);
 
-  // Track active section on scroll
+  // Track active section on scroll using offset positions for perfect cross-device precision
   useEffect(() => {
-    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
-      return;
-    }
-    try {
-      const obs = new IntersectionObserver((entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            setActiveTab(e.target.id);
+    if (typeof window === 'undefined') return;
+
+    const handleScrollActiveTrack = () => {
+      const scrollYVal = window.scrollY !== undefined ? window.scrollY : window.pageYOffset;
+      const headerOffset = 110; // Compensates for header height + safety offset
+
+      let activeSectionId = menuCategories[0].id;
+
+      for (const cat of menuCategories) {
+        const el = document.getElementById(cat.id);
+        if (el) {
+          const elementOffsetTop = el.offsetTop - headerOffset;
+          if (scrollYVal >= elementOffsetTop) {
+            activeSectionId = cat.id;
           }
-        });
-      }, { rootMargin: '-20% 0px -55% 0px' });
-      
-      menuCategories.forEach((c) => {
-        const el = document.getElementById(c.id);
-        if (el) obs.observe(el);
-      });
-      return () => obs.disconnect();
-    } catch (e) {
-      console.warn("IntersectionObserver failed to initialize:", e);
-    }
+        }
+      }
+      setActiveTab(activeSectionId);
+    };
+
+    window.addEventListener('scroll', handleScrollActiveTrack, { passive: true });
+    // Run once initially to sync active state
+    handleScrollActiveTrack();
+
+    return () => window.removeEventListener('scroll', handleScrollActiveTrack);
   }, []);
 
   const phoneNumber = "+917760288291";
